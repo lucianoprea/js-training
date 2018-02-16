@@ -42,5 +42,11 @@
     }],
     "strict": [2, "never"],
     "wrap-iife": [2, "inside"]
+  },
+  "globals": {
+    "$": true,
+    "updateWord": true,
+    "updateFailTriesCount": true,
+    "startGame": true
   }
 }
