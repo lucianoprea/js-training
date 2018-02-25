@@ -1,7 +1,7 @@
 let $canvas = document.getElementById('drawing');
 let $canvasDiv = document.getElementById('drawingCnt');
 function resize() {
-  $canvas.width = $canvasDiv.offsetWidth;
+  $canvas.width = $canvasDiv.offsetWidth * (2/3);
   $canvas.height = $canvas.width * (2/3);
 }
 resize();
@@ -61,21 +61,72 @@ Rectangle.prototype.drawFrame = function () {
   ctx.fill();
 };
 
-// create some demo shapeds
-let c1 = new Circle(30, 60, 30);
-let c2 = new Circle(60, 30, 30);
-let c3 = new Circle(90, 60, 30);
-let c4 = new Circle(60, 90, 30);
+// factory
+function createShape(shape) {
+  switch (shape.type) {
+    case 'Circle':
+      return new Circle(shape.x, shape.y, shape.r);
+    case 'Rectangle':
+      return new Rectangle(shape.x, shape.y, shape.width, shape.height);
+    default:
+      throw new Error(`Shape type '${shape.type}' constructor not handled in factory`);
+  }
+}
 
-let r1 = new Rectangle(100, 100, 40, 50);
-let r2 = new Rectangle(110, 110, 50, 40);
+let simulateTimeout;
+function retrieveAllTheShapes(callback) {
+  clearTimeout(simulateTimeout);
+  // simulate an http call to retrieve shapes
+  simulateTimeout = setTimeout(function() {
+    // create some demo shapeds
+    let shapes = [{
+      type: 'Circle',
+      x: 30,
+      y: 60,
+      r: 30
+    }, {
+      type: 'Circle',
+      x: 60,
+      y: 30,
+      r: 30
+    }, {
+      type: 'Circle',
+      x: 90,
+      y: 60,
+      r: 30
+    }, {
+      type: 'Circle',
+      x: 60,
+      y: 90,
+      r: 30
+    }, {
+      type: 'Rectangle',
+      x: 100,
+      y: 100,
+      width: 40,
+      height: 50
+    },  {
+      type: 'Rectangle',
+      x: 110,
+      y: 110,
+      width: 50,
+      height: 40
+    }];
+
+    callback(shapes);
+  }, 5 * 1000);
+};
+
 let drawAllTheShapes = function() {
-  c1.draw();
-  c2.draw();
-  c3.draw();
-  c4.draw();
-  r1.draw();
-  r2.draw();
+  toggleProgress(true);
+  let doneCallback = function(shapes) {
+    shapes.forEach(shape => {
+      let shapeObject = createShape(shape);
+      shapeObject.draw();
+    });
+    toggleProgress(false);
+  };
+  retrieveAllTheShapes(doneCallback);
 }
 
 drawAllTheShapes();
@@ -86,6 +137,10 @@ window.addEventListener('resize', () => {
   resize();
   drawAllTheShapes();
 }, false);
+
+function toggleProgress(show) {
+  document.getElementById('loading').classList.toggle('d-none', !show);
+}
 
 let addShapeBtn = document.getElementById('addShape');
 // add event listener on the select type
